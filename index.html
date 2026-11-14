@@ -190,6 +190,16 @@ textarea{min-height:92px;resize:vertical}
 .r .v{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
 .r .m{grid-column:1/-1;font-size:13px;color:var(--sub)}
 .r.liar .v{color:var(--danger)} .r.spy .v{color:var(--accent-ink)}
+.hi{display:flex;align-items:center;gap:8px}
+.ib{position:relative;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--sub);background:transparent;color:var(--sub);padding:0;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:15px;line-height:1;letter-spacing:0}
+.ib::after{content:"";position:absolute;inset:-11px}
+.ib[aria-expanded=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.info{margin:0;display:flex;flex-direction:column;background:var(--fill);border-radius:14px;padding:4px 16px}
+.info>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.info>div:first-child{border-top:0}
+.info dt{font-weight:600;font-size:15px}
+.info dt small{display:block;font-weight:400;font-size:13px;color:var(--sub);margin-top:2px}
+.info dd{margin:0;text-align:right;font-weight:700;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .gain{color:var(--accent-ink);background:var(--accent-soft);font-weight:700;font-size:13px;padding:2px 7px;border-radius:7px;margin-right:6px}
 .r .m .gain{margin:0 0 0 2px}
 </style>
@@ -477,10 +487,22 @@ function vSetup(){
     '<div class="line"><span>설명 바퀴</span>'+seg('laps',[[1,'1바퀴'],[2,'2바퀴']],S.laps)+'</div>'+
     '<div class="line"><span>토론</span>'+seg('discussSec',[[0,'끔'],[60,'1분'],[120,'2분'],[180,'3분']],S.discussSec)+'</div></section>';
 
-  if(hasScore) h+='<section class="sec"><div class="line"><h2>점수</h2><button type="button" class="text" data-a="reset-score">'+(S.quit?'정말 지울까요? 한 번 더':'점수 지우기')+'</button></div>'+scoreRows(null)+'</section>';
+  h+='<section class="sec"><div class="line">'+scoreHead()+(hasScore?'<button type="button" class="text" data-a="reset-score">'+(S.quit?'정말 지울까요? 한 번 더':'점수 지우기')+'</button>':'')+'</div>'+scoreInfo()+(hasScore?scoreRows(null):'<p class="note">아직 점수가 없어요. 한 판 끝나면 여기에 쌓여요.</p>')+'</section>';
 
   h+='<div class="bar"><p class="note">'+summary()+'</p><button type="button" class="btn go" data-a="start">시작</button></div>';
   return h;
+}
+function scoreHead(){
+  return '<h2 class="hi">점수<button type="button" class="ib" data-a="info" aria-expanded="'+!!S.info+'" aria-label="점수 계산 방법 '+(S.info?'닫기':'보기')+'">i</button></h2>';
+}
+function scoreInfo(){
+  if(!S.info) return '';
+  return '<dl class="info">'+
+    '<div><dt>시민 승리<small>라이어를 잡았고, 라이어가 제시어를 틀렸을 때</small></dt><dd>시민 +1</dd></div>'+
+    '<div><dt>라이어 역전승<small>라이어가 잡혔지만 제시어를 맞혔을 때</small></dt><dd>라이어 +1<br>스파이 +1</dd></div>'+
+    '<div><dt>라이어 승리<small>라이어가 아닌 사람을 지목했거나, 재투표도 동점일 때</small></dt><dd>라이어 +2<br>스파이 +1</dd></div>'+
+    '<div><dt>시민이 없는 판<small>라이어와 스파이뿐이면 점수를 매기지 않아요</small></dt><dd>없음</dd></div>'+
+    '</dl><p class="note">점수는 이 폰에 쌓이고, 점수 지우기를 누르기 전까지 남아요.</p>';
 }
 function scoreRows(deltas){
   var rows=S.players.map(function(p,i){return {i:i,s:p.score||0};}).sort(function(a,b){return b.s-a.s||a.i-b.i;});
@@ -570,7 +592,7 @@ function vResult(){
     var r=R.roles[i], vt=R.finalVotes&&R.finalVotes[i]!==undefined?R.finalVotes[i]:null;
     return '<div class="r '+r+'"><span class="n">'+nm(i)+'</span><span class="v">'+roleName[r]+'</span><span class="m">'+(vt!==null?nm(vt)+'에게 투표':'투표 안 함')+(R.deltas[i]?' · <span class="gain">+'+R.deltas[i]+'점</span>':'')+'</span></div>';
   }).join('')+'</div></section>';
-  h+='<section class="sec"><h2>점수</h2>'+scoreRows(R.deltas)+'<p class="note">'+(R.citizens?'시민이 이기면 시민 +1. 라이어가 안 잡히면 라이어 +2, 스파이 +1. 역전승은 라이어와 스파이 +1.':'시민이 없는 판이라 점수는 없어요.')+'</p></section>';
+  h+='<section class="sec">'+scoreHead()+scoreInfo()+scoreRows(R.deltas)+(R.citizens?'':'<p class="note">시민이 없는 판이라 이번 판은 점수가 없어요.</p>')+'</section>';
   h+='<div class="acts"><button type="button" class="btn go" data-a="again">한 판 더</button><button type="button" class="btn sm" data-a="to-setup">설정 바꾸기</button></div>';
   return h;
 }
@@ -600,6 +622,7 @@ var ACT={
     clamp();
   },
   'theme':function(){ S.theme=isDark()?'light':'dark'; applyTheme(); },
+  'info':function(){ S.info=!S.info; },
   'names':function(){ S.namesOpen=true; },
   'set':function(d){
     var k=d.k, v=d.v;
@@ -717,7 +740,7 @@ function start(data){
   if(data&&data.S){ for(k in data.S) S[k]=data.S[k]; R=data.R||null; }
   else if(rd&&rd.R&&VIEWS[rd.screen]&&Date.now()-rd.at<3*3600*1000&&rd.R.roles&&rd.R.roles.length===(S.players||[]).length){ R=rd.R; S.screen=rd.screen; }
   if(!Array.isArray(S.used)) S.used=[];
-  S.quit=false; S.skip=false;
+  S.quit=false; S.skip=false; S.info=false;
   if(S.theme!=='dark'&&S.theme!=='light') S.theme='auto';
   applyTheme();
   if(!Array.isArray(S.players)||S.players.length<MINP) S.players=defaults().players;
