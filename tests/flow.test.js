@@ -112,7 +112,7 @@ assert.strictEqual(r.roles.filter((x) => x === 'citizen').length, 0);
 assert.strictEqual(r.gains, 0, '시민 없는 판은 점수 없음');
 
 r = play({ set: { mode: 'basic' }, spies: -2, liars: 9, target: voteNext });
-assert.strictEqual(r.title, '전원 라이어!'); assert.strictEqual(r.gains, 0);
+assert.strictEqual(r.title, '전원 라이어'); assert.strictEqual(r.gains, 0);
 
 click('start');
 boot();

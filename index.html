@@ -100,8 +100,8 @@ textarea{min-height:92px;resize:vertical}
 .bar{position:sticky;bottom:0;margin:auto -20px -24px;padding:22px 20px max(18px,env(safe-area-inset-bottom));margin-bottom:calc(-1 * max(24px,env(safe-area-inset-bottom)));background:linear-gradient(to top,var(--bg) 86%,transparent);display:flex;flex-direction:column;gap:8px}
 .bar .note{text-align:center}
 .switch{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:8px 0;min-height:44px;color:var(--sub);font-size:15px;font-weight:600}
-.switch i{position:relative;width:46px;height:28px;border-radius:99px;background:var(--edge);transition:background .15s}
-.switch i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.switch i{position:relative;width:46px;height:28px;border-radius:99px;background:var(--edge);transition:background .08s}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .08s}
 .switch[aria-checked=true] i{background:var(--accent)}
 .switch[aria-checked=true] i::after{transform:translateX(18px)}
 .head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -190,16 +190,19 @@ textarea{min-height:92px;resize:vertical}
 .r .v{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
 .r .m{grid-column:1/-1;font-size:13px;color:var(--sub)}
 .r.liar .v{color:var(--danger)} .r.spy .v{color:var(--accent-ink)}
-.hi{display:flex;align-items:center;gap:8px}
-.ib{position:relative;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--sub);background:transparent;color:var(--sub);padding:0;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:15px;line-height:1;letter-spacing:0}
-.ib::after{content:"";position:absolute;inset:-11px}
-.ib[aria-expanded=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.hi{display:flex;align-items:center;gap:6px}
+.ib{position:relative;width:18px;height:18px;border:0;background:none;padding:0;color:var(--ink);line-height:0}
+.ib svg{width:18px;height:18px;display:block}
+.ib::after{content:"";position:absolute;inset:-13px}
+.ib[aria-expanded=true]{color:var(--accent-ink)}
 .info{margin:0;display:flex;flex-direction:column;background:var(--fill);border-radius:14px;padding:4px 16px}
 .info>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
 .info>div:first-child{border-top:0}
 .info dt{font-weight:600;font-size:15px}
 .info dt small{display:block;font-weight:400;font-size:13px;color:var(--sub);margin-top:2px}
 .info dd{margin:0;text-align:right;font-weight:700;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){ .info{animation:pop .1s ease-out} }
+@keyframes pop{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 .gain{color:var(--accent-ink);background:var(--accent-soft);font-weight:700;font-size:13px;padding:2px 7px;border-radius:7px;margin-right:6px}
 .r .m .gain{margin:0 0 0 2px}
 </style>
@@ -347,7 +350,7 @@ function tick(){
   if(!T) return;
   var r=remain(), el=document.getElementById('timer');
   if(el){
-    el.querySelector('.num').textContent=r>0?fmt(r):'시간 끝!';
+    el.querySelector('.num').textContent=r>0?fmt(r):'시간 끝';
     el.querySelector('.track i').style.width=frac()+'%';
     el.classList.toggle('low',r>0&&r<=5);
     el.classList.toggle('done',r===0);
@@ -357,7 +360,7 @@ function tick(){
 function timerHTML(){
   if(!T) return '';
   var r=remain();
-  return '<div class="timer'+(r===0?' done':(r<=5?' low':''))+'" id="timer" role="timer"><div class="num">'+(r>0?fmt(r):'시간 끝!')+'</div><div class="track"><i style="width:'+frac()+'%"></i></div></div>';
+  return '<div class="timer'+(r===0?' done':(r<=5?' low':''))+'" id="timer" role="timer"><div class="num">'+(r>0?fmt(r):'시간 끝')+'</div><div class="track"><i style="width:'+frac()+'%"></i></div></div>';
 }
 function initAudio(){ try{ if(!audio){ var C=window.AudioContext||window.webkitAudioContext; if(C) audio=new C(); } if(audio&&audio.state==='suspended') audio.resume(); }catch(e){} }
 function beep(){
@@ -448,61 +451,84 @@ function summary(){
 }
 function vSetup(){
   var n=S.players.length, mL=maxLiars(n,S.spy), cats=allCats(), hasScore=S.players.some(function(p){return p.score;});
-  var h='<header><div class="head"><h1 class="title" tabindex="-1">라이어 <em>게임</em></h1><button type="button" class="switch" role="switch" aria-checked="'+isDark()+'" data-a="theme">다크 모드<i></i></button></div><p class="lead">폰 하나를 돌려가며 해요.</p></header>';
+  var h='<header><div class="head"><h1 class="title" tabindex="-1">라이어 <em>게임</em></h1><button type="button" class="switch" role="switch" aria-checked="'+isDark()+'" data-a="theme">다크 모드<i></i></button></div></header>';
 
   h+='<section class="sec"><div class="line"><h2>인원</h2><div class="count"><button type="button" class="sq" data-a="pc" data-d="-1" aria-label="한 명 줄이기"'+(n<=MINP?' disabled':'')+'>−</button><b>'+n+'명</b><button type="button" class="sq" data-a="pc" data-d="1" aria-label="한 명 늘리기"'+(n>=MAXP?' disabled':'')+'>+</button></div></div>';
   if(S.namesOpen) h+='<div class="names">'+S.players.map(function(p,i){
       return '<input type="text" id="p'+i+'" data-pi="'+i+'" maxlength="8" value="'+esc(p.name)+'" placeholder="'+(i+1)+'번" aria-label="'+(i+1)+'번 이름">';
-    }).join('')+'</div><p class="note">앉은 순서대로 적어 주세요. 비워 두면 번호로 불러요.</p>';
+    }).join('')+'</div><p class="note">앉은 순서대로 적어 주세요.</p>';
   else h+='<div class="line"><span class="note">'+S.players.map(function(_,i){return nm(i);}).join(', ')+'</span><button type="button" class="text" data-a="names">이름 적기</button></div>';
   h+='</section>';
 
-  h+='<section class="sec"><h2>규칙</h2>'+
+  h+='<section class="sec">'+head('rules','규칙')+infoBox('rules')+
     '<div class="line"><span>모드</span>'+seg('mode',[['basic','기본'],['fool','바보']],S.mode)+'</div>'+
-    '<p class="note">'+(S.mode==='basic'?'라이어는 주제만 알아요.':'라이어는 다른 단어를 받고, 자기가 라이어인 줄 몰라요.')+'</p>'+
     '<div class="line"><span>라이어</span><div class="count"><button type="button" class="sq" data-a="liars" data-d="-1" aria-label="라이어 줄이기"'+(S.liars<=1?' disabled':'')+'>−</button><b>'+S.liars+'명</b><button type="button" class="sq" data-a="liars" data-d="1" aria-label="라이어 늘리기"'+(S.liars>=mL?' disabled':'')+'>+</button></div></div>'+
-    (S.liars+S.spy>=n?'<p class="warn">시민이 한 명도 없는 판이에요. 점수는 안 매겨요.</p>':(S.mode==='fool'&&S.liars*2>=n?'<p class="warn">라이어가 절반 이상이면 가짜 단어가 다수가 돼요.</p>':''))+
+    (S.liars+S.spy>=n?'<p class="warn">시민이 없어 점수를 매기지 않아요.</p>':(S.mode==='fool'&&S.liars*2>=n?'<p class="warn">라이어가 절반 이상이면 누가 라이어인지 가리기 어려워요.</p>':''))+
     '<div class="line"><span>스파이</span><div class="count"><button type="button" class="sq" data-a="spies" data-d="-1" aria-label="스파이 줄이기"'+(S.spy<=0?' disabled':'')+'>−</button><b>'+S.spy+'명</b><button type="button" class="sq" data-a="spies" data-d="1" aria-label="스파이 늘리기"'+(S.spy>=n-S.liars?' disabled':'')+'>+</button></div></div>'+
-    (S.spy?'<p class="note">스파이는 제시어를 알지만 라이어 편이에요.</p>':'')+'</section>';
+    '</section>';
 
   var names=Object.keys(cats).sort(function(x,y){ return (S.custom[y]?1:0)-(S.custom[x]?1:0); });
   var onN=names.filter(function(c){return S.cats.indexOf(c)>=0;}).length;
-  h+='<section class="sec"><div class="line"><h2>주제</h2><button type="button" class="text" data-a="cats-toggle">'+(S.catsOpen?'접기':'고르기')+'</button></div>'+
-    '<p class="note">'+names.length+'개 중 '+(onN?onN+'개에서':'전부에서')+' 무작위로 나와요.</p>';
+  h+='<section class="sec"><div class="line">'+head('topics','주제')+'<button type="button" class="text" data-a="cats-toggle">'+(S.catsOpen?'접기':'고르기')+'</button></div>'+infoBox('topics')+
+    '<p class="note">'+(onN?names.length+'개 중 '+onN+'개 선택':'선택한 주제가 없으면 전체에서 나와요.')+'</p>';
   if(S.catsOpen) h+='<div class="line end"><button type="button" class="text" data-a="cats-all">전체 선택</button><button type="button" class="text" data-a="cats-none">전체 해제</button></div><div class="tiles">'+names.map(function(c){
     var on=S.cats.indexOf(c)>=0, cu=!!S.custom[c];
     return '<span class="tile'+(on?' on':'')+'"><button type="button" data-a="cat" data-c="'+esc(c)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(c)+'</button>'+(cu?'<button type="button" class="rm" data-a="del-cat" data-c="'+esc(c)+'" aria-label="'+esc(c)+' 지우기">×</button>':'')+'</span>';
   }).join('')+'</div>';
   if(S.catOpen) h+='<div class="form">'+
-    '<input type="text" id="ccName" maxlength="14" placeholder="주제 (예: 우리 과 교수님)" value="'+esc(S.draft.name)+'" aria-label="주제 이름">'+
-    (AI?'<button type="button" class="btn sm" data-a="ai-fill"'+(S.aiBusy?' disabled':'')+'>'+(S.aiBusy?'AI가 채우는 중…':'AI로 단어 채우기')+'</button>':'<p class="note">AI로 단어 채우기는 Claude에서 열었을 때만 쓸 수 있어요.</p>')+
-    '<textarea id="ccWords" placeholder="단어를 쉼표나 줄바꿈으로 나눠서 4개 이상" aria-label="단어 목록">'+esc(S.draft.words)+'</textarea>'+
+    '<input type="text" id="ccName" maxlength="14" placeholder="주제 이름 (예: 우리 과 교수님)" value="'+esc(S.draft.name)+'" aria-label="주제 이름">'+
+    (AI?'<button type="button" class="btn sm" data-a="ai-fill"'+(S.aiBusy?' disabled':'')+'>'+(S.aiBusy?'채우는 중…':'AI로 단어 채우기')+'</button>':'')+
+    '<textarea id="ccWords" placeholder="단어 4개 이상, 쉼표나 줄바꿈으로 구분" aria-label="단어 목록">'+esc(S.draft.words)+'</textarea>'+
     (S.draftErr?'<p class="warn">'+esc(S.draftErr)+'</p>':'')+
-    '<button type="button" class="btn sm" data-a="add-cat">주제 저장</button><button type="button" class="text" data-a="cat-close">닫기</button></div>';
-  else h+='<button type="button" class="btn sm" data-a="cat-open">+ 주제 직접 만들기'+(AI?' · AI로 채우기':'')+'</button>';
+    '<button type="button" class="btn sm" data-a="add-cat">저장</button><button type="button" class="text" data-a="cat-close">닫기</button></div>';
+  else h+='<button type="button" class="btn sm" data-a="cat-open">+ 주제 만들기</button>';
   h+='</section>';
 
-  h+='<section class="sec"><h2>시간</h2>'+
-    '<div class="line"><span>한 사람 발언</span>'+seg('speakSec',[[0,'끔'],[20,'20초'],[30,'30초'],[45,'45초'],[60,'60초']],S.speakSec)+'</div>'+
-    '<div class="line"><span>설명 바퀴</span>'+seg('laps',[[1,'1바퀴'],[2,'2바퀴']],S.laps)+'</div>'+
-    '<div class="line"><span>토론</span>'+seg('discussSec',[[0,'끔'],[60,'1분'],[120,'2분'],[180,'3분']],S.discussSec)+'</div></section>';
+  h+='<section class="sec">'+head('time','진행')+infoBox('time')+
+    '<div class="line"><span>설명 시간</span>'+seg('speakSec',[[0,'없음'],[20,'20초'],[30,'30초'],[45,'45초'],[60,'60초']],S.speakSec)+'</div>'+
+    '<div class="line"><span>설명 횟수</span>'+seg('laps',[[1,'1바퀴'],[2,'2바퀴']],S.laps)+'</div>'+
+    '<div class="line"><span>토론 시간</span>'+seg('discussSec',[[0,'생략'],[60,'1분'],[120,'2분'],[180,'3분']],S.discussSec)+'</div></section>';
 
-  h+='<section class="sec"><div class="line">'+scoreHead()+(hasScore?'<button type="button" class="text" data-a="reset-score">'+(S.quit?'정말 지울까요? 한 번 더':'점수 지우기')+'</button>':'')+'</div>'+scoreInfo()+(hasScore?scoreRows(null):'<p class="note">아직 점수가 없어요. 한 판 끝나면 여기에 쌓여요.</p>')+'</section>';
+  h+='<section class="sec"><div class="line">'+head('score','점수')+(hasScore?'<button type="button" class="text" data-a="reset-score">'+(S.quit?'한 번 더 누르면 지워요':'점수 지우기')+'</button>':'')+'</div>'+infoBox('score')+(hasScore?scoreRows(null):'<p class="note">아직 점수가 없어요.</p>')+'</section>';
 
   h+='<div class="bar"><p class="note">'+summary()+'</p><button type="button" class="btn go" data-a="start">시작</button></div>';
   return h;
 }
-function scoreHead(){
-  return '<h2 class="hi">점수<button type="button" class="ib" data-a="info" aria-expanded="'+!!S.info+'" aria-label="점수 계산 방법 '+(S.info?'닫기':'보기')+'">i</button></h2>';
+var INFO={
+  rules:[
+    ['기본 모드','라이어는 주제만 알고 제시어는 몰라요.'],
+    ['바보 모드','라이어는 다른 단어를 받고, 자기가 라이어인 줄 몰라요.'],
+    ['라이어','제시어를 몰라요. 잡혀도 제시어를 맞히면 이겨요.'],
+    ['스파이','제시어를 알지만 라이어 편이에요. 라이어가 누구인지는 몰라요.'],
+    ['투표','표를 가장 많이 받은 사람의 정체를 공개해요. 동점이면 동점인 사람을 두고 다시 투표하고, 다시 동점이면 라이어가 이겨요.']
+  ],
+  topics:[
+    ['주제 고르기','판마다 선택한 주제 중 하나가 무작위로 나와요.'],
+    ['주제 만들기','주제 이름과 단어 4개 이상을 적어요. 이 폰에 저장돼요.'],
+    ['AI로 단어 채우기','주제 이름을 적으면 단어를 채워요. Claude에서 열었을 때만 쓸 수 있어요.']
+  ],
+  time:[
+    ['설명 시간','한 명이 설명하는 시간이에요. 끝나면 소리와 진동으로 알려요.'],
+    ['설명 횟수','한 사람이 설명하는 횟수예요.'],
+    ['토론 시간','설명이 끝난 뒤 투표 전까지의 시간이에요.']
+  ],
+  score:[
+    ['시민 승리','라이어를 잡았고, 라이어가 제시어를 틀렸을 때','시민 +1'],
+    ['라이어 역전승','라이어가 잡혔지만 제시어를 맞혔을 때','라이어 +1<br>스파이 +1'],
+    ['라이어 승리','라이어가 아닌 사람을 지목했거나, 재투표도 동점일 때','라이어 +2<br>스파이 +1'],
+    ['시민이 없는 판','라이어와 스파이뿐일 때','없음'],
+    ['점수 보관','이 폰에 저장돼요.']
+  ]
+};
+function head(key,title){
+  var on=S.info===key;
+  return '<h2 class="hi">'+title+'<button type="button" class="ib" data-a="info" data-k="'+key+'" aria-expanded="'+on+'" aria-label="'+title+' 설명 '+(on?'닫기':'보기')+'"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.6" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="5.6" r="1.1" fill="currentColor"/><path d="M9 8.3v4.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></h2>';
 }
-function scoreInfo(){
-  if(!S.info) return '';
-  return '<dl class="info">'+
-    '<div><dt>시민 승리<small>라이어를 잡았고, 라이어가 제시어를 틀렸을 때</small></dt><dd>시민 +1</dd></div>'+
-    '<div><dt>라이어 역전승<small>라이어가 잡혔지만 제시어를 맞혔을 때</small></dt><dd>라이어 +1<br>스파이 +1</dd></div>'+
-    '<div><dt>라이어 승리<small>라이어가 아닌 사람을 지목했거나, 재투표도 동점일 때</small></dt><dd>라이어 +2<br>스파이 +1</dd></div>'+
-    '<div><dt>시민이 없는 판<small>라이어와 스파이뿐이면 점수를 매기지 않아요</small></dt><dd>없음</dd></div>'+
-    '</dl><p class="note">점수는 이 폰에 쌓이고, 점수 지우기를 누르기 전까지 남아요.</p>';
+function infoBox(key){
+  if(S.info!==key) return '';
+  return '<dl class="info">'+INFO[key].map(function(r){
+    return '<div><dt>'+r[0]+'<small>'+r[1]+'</small></dt>'+(r[2]?'<dd>'+r[2]+'</dd>':'')+'</div>';
+  }).join('')+'</dl>';
 }
 function scoreRows(deltas){
   var rows=S.players.map(function(p,i){return {i:i,s:p.score||0};}).sort(function(a,b){return b.s-a.s||a.i-b.i;});
@@ -513,56 +539,56 @@ function scoreRows(deltas){
 function wordSize(w){ return w.length<=4?'':(w.length<=7?' m':' s'); }
 function cardFace(i){
   var r=R.roles[i], fool=S.mode==='fool', kind='주제 · '+esc(R.cat);
-  if(r==='liar'&&!fool) return '<div class="kind">'+kind+'</div><div class="word">라이어</div><div class="tip">아는 척하세요. 걸려도 제시어만 맞히면 이겨요.</div>';
-  if(r==='spy') return '<div class="kind">'+kind+' · 스파이</div><div class="word'+wordSize(R.word)+'">'+esc(R.word)+'</div><div class="tip">라이어 편이에요. 라이어가 안 잡히게 도와주세요.</div>';
+  if(r==='liar'&&!fool) return '<div class="kind">'+kind+'</div><div class="word">라이어</div><div class="tip">잡혀도 제시어를 맞히면 이겨요.</div>';
+  if(r==='spy') return '<div class="kind">'+kind+' · 스파이</div><div class="word'+wordSize(R.word)+'">'+esc(R.word)+'</div><div class="tip">라이어 편이에요.</div>';
   var w=(r==='liar')?R.fake:R.word;
-  return '<div class="kind">'+kind+'</div><div class="word'+wordSize(w)+'">'+esc(w)+'</div><div class="tip">'+(fool?'누군가는 다른 단어를 받았어요. 나일 수도 있어요.':'라이어는 모르게, 우리 편은 알게.')+'</div>';
+  return '<div class="kind">'+kind+'</div><div class="word'+wordSize(w)+'">'+esc(w)+'</div><div class="tip">'+(fool?'내가 라이어일 수도 있어요.':'')+'</div>';
 }
 function vReveal(){
   var i=R.ri, n=S.players.length, last=i===n-1, ready='다 봤어요';
   return topBar(prog('카드 확인',i+1,n))+
     '<div class="stage mid"><h1 class="name" tabindex="-1">'+nm(i)+'</h1>'+
     '<div class="card" id="peek" role="button" tabindex="0" aria-label="누르고 있는 동안 카드가 보여요">'+
-      '<div class="back"><b>꾹 누르면<br>보여요</b><span>손을 떼면 다시 덮여요</span></div>'+
+      '<div class="back"><b>누르고 있는 동안<br>보여요</b></div>'+
       '<div class="face">'+cardFace(i)+'</div></div>'+
     '<p class="note">'+jo(i,'만','만')+' 보세요.</p></div>'+
-    '<div class="acts"><button type="button" class="btn" id="seenBtn" data-a="next-reveal" data-ready="'+ready+'"'+(R.seen?'':' disabled')+'>'+(R.seen?ready:'카드를 먼저 확인해요')+'</button>'+
-    '<p class="note">'+(last?'누른 다음 폰을 가운데 두세요.':'누른 다음 '+jo(i+1,'에게','에게')+' 넘겨요.')+'</p></div>';
+    '<div class="acts"><button type="button" class="btn" id="seenBtn" data-a="next-reveal" data-ready="'+ready+'"'+(R.seen?'':' disabled')+'>'+(R.seen?ready:'카드를 먼저 보세요')+'</button>'+
+    '<p class="note">'+(last?'폰을 가운데에 두세요.':jo(i+1,'에게','에게')+' 넘겨 주세요.')+'</p></div>';
 }
 function orderHTML(cur){
   return '<p class="order">'+R.order.map(function(p){ return cur===p?'<b>'+nm(p)+'</b>':nm(p); }).join(' → ')+'</p>';
 }
 function vReady(){
   var p=R.order[0];
-  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name xl" tabindex="-1">'+nm(p)+'부터</h1><p class="lead">주제는 '+esc(R.cat)+'. 한 문장씩 돌아가며 설명해요.</p></div>'+orderHTML(p)+'</div>'+
+  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name xl" tabindex="-1">'+nm(p)+'부터</h1><p class="lead">한 문장씩 돌아가며 설명해요.</p></div>'+orderHTML(p)+'</div>'+
     '<div class="acts"><button type="button" class="btn go" data-a="begin">설명 시작</button></div>';
 }
 function vSpeak(){
   var p=R.turns[R.ti], last=R.ti===R.turns.length-1, n=S.players.length;
   return topBar(prog(R.cat+(S.laps>1?' · '+(Math.floor(R.ti/n)+1)+'바퀴':''),R.ti+1,R.turns.length))+
-    '<div class="stage"><div><h1 class="name" tabindex="-1">'+nm(p)+'</h1><p class="lead">한 문장으로 설명해요.</p></div>'+timerHTML()+orderHTML(p)+'</div>'+
+    '<div class="stage"><div><h1 class="name" tabindex="-1">'+nm(p)+'</h1></div>'+timerHTML()+orderHTML(p)+'</div>'+
     '<div class="acts"><button type="button" class="btn" data-a="next-speak">'+(last?(S.discussSec?'토론 시작':'투표 시작'):'다음 · '+nm(R.turns[R.ti+1]))+'</button>'+
-    '<div class="row">'+(R.ti>0?'<button type="button" class="text" data-a="prev-speak">이전 사람으로</button>':'<span></span>')+(last?'':'<button type="button" class="text" data-a="skip-vote">'+(S.skip?'남은 사람 건너뛸까요? 한 번 더':'바로 투표')+'</button>')+'</div></div>';
+    '<div class="row">'+(R.ti>0?'<button type="button" class="text" data-a="prev-speak">이전</button>':'<span></span>')+(last?'':'<button type="button" class="text" data-a="skip-vote">'+(S.skip?'한 번 더 누르면 투표':'바로 투표')+'</button>')+'</div></div>';
 }
 function vDiscuss(){
-  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name" tabindex="-1">누가 라이어일까?</h1><p class="lead">충분히 떠들었으면 투표해요.</p></div>'+timerHTML()+'</div>'+
+  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name" tabindex="-1">토론</h1></div>'+timerHTML()+'</div>'+
     '<div class="acts"><button type="button" class="btn go" data-a="to-vote">투표 시작</button></div>';
 }
 function vVote(){
   var v=R.v, i=v.vi, n=S.players.length, opts;
   var h=topBar(prog(v.round===2?'재투표':'투표',i+1,n))+'<div class="stage"><h1 class="name" tabindex="-1">'+nm(i)+'</h1>';
-  if(!v.open) return h+'<p class="lead">'+jo(i,'에게','에게')+' 폰을 넘겨 주세요. 누구를 찍었는지는 끝나고 공개돼요.</p></div>'+
-    '<div class="acts"><button type="button" class="btn" data-a="open-vote">'+jo(i,'이에요','예요')+', 투표할게요</button></div>';
+  if(!v.open) return h+'<p class="lead">'+jo(i,'에게','에게')+' 폰을 넘겨 주세요.'+(i===0?' 누구에게 투표했는지는 끝나고 공개돼요.':'')+'</p></div>'+
+    '<div class="acts"><button type="button" class="btn" data-a="open-vote">투표하기</button></div>';
   opts=voteOptions(i);
-  return h+'<p class="lead">'+(v.round===2?'동점인 사람 중에 ':'')+'누가 라이어 같아요?</p><div class="opts'+(opts.length>5?' two':'')+'">'+opts.map(function(j){
+  return h+'<p class="lead">'+(v.round===2?'동점인 사람 중에서 고르세요.':'라이어를 고르세요.')+'</p><div class="opts'+(opts.length>5?' two':'')+'">'+opts.map(function(j){
       return '<button type="button" class="opt" data-a="pick" data-j="'+j+'" aria-pressed="'+(v.pick===j)+'">'+nm(j)+'</button>';
-    }).join('')+'</div></div><div class="acts stick"><button type="button" class="btn" data-a="cast"'+(v.pick===null?' disabled':'')+'>'+(v.pick===null?'한 명을 골라요':nm(v.pick)+'에게 투표')+'</button></div>';
+    }).join('')+'</div></div><div class="acts stick"><button type="button" class="btn" data-a="cast"'+(v.pick===null?' disabled':'')+'>'+(v.pick===null?'투표':nm(v.pick)+'에게 투표')+'</button></div>';
 }
 function vTally(){
   var t=R.tally, n=S.players.length, tie=t.top.length>1;
   var rows=S.players.map(function(_,i){return i;}).filter(function(i){return t.counts[i]>0;}).sort(function(a,b){return t.counts[b]-t.counts[a]||a-b;});
-  var h=topBar('투표 결과')+'<div class="stage"><div><h1 class="name" tabindex="-1">'+(tie?'동점!':nm(R.accused)+' 지목')+'</h1><p class="lead">'+
-    (tie?(t.round===1?'동점인 사람끼리 한 번 더 투표해요.':'또 동점이에요. 라이어가 빠져나갔어요.'):'진짜 라이어일까요?')+'</p></div>'+
+  var h=topBar('투표 결과')+'<div class="stage"><div><h1 class="name" tabindex="-1">'+(tie?'동점':nm(R.accused)+' 지목')+'</h1>'+
+    (tie?'<p class="lead">'+(t.round===1?'동점인 사람을 두고 다시 투표해요.':'다시 동점이라 라이어가 이겼어요.')+'</p>':'')+'</div>'+
     '<div class="tally">'+rows.map(function(i){
       return '<div class="trow'+(t.top.indexOf(i)>=0?' top':'')+'"><span class="n">'+nm(i)+'</span><span class="c">'+t.counts[i]+'표</span><div class="b"><i style="width:'+(t.counts[i]/n*100)+'%"></i></div></div>';
     }).join('')+'</div></div><div class="acts">';
@@ -573,26 +599,26 @@ function vTally(){
 }
 function vGuess(){
   var g=R.g, a=R.accused;
-  var h=topBar('라이어 검거')+'<div class="stage"><h1 class="name" tabindex="-1">'+jo(a,'은','는')+' 라이어!</h1>';
-  if(!g.open) return h+'<p class="lead">아직 안 끝났어요. 제시어를 맞히면 역전이에요. '+jo(a,'에게','에게')+' 폰을 넘겨 주세요.</p></div>'+
+  var h=topBar('정체 공개')+'<div class="stage"><h1 class="name" tabindex="-1">'+jo(a,'은','는')+' 라이어</h1>';
+  if(!g.open) return h+'<p class="lead">제시어를 맞히면 라이어가 이겨요. '+jo(a,'에게','에게')+' 폰을 넘겨 주세요.</p></div>'+
     '<div class="acts"><button type="button" class="btn go" data-a="open-guess">제시어 맞히기</button></div>';
-  return h+'<p class="lead">'+esc(R.cat)+' 중에 뭐였을까요? 기회는 한 번이에요.</p><div class="opts two words">'+R.words.map(function(w,k){
+  return h+'<p class="lead">제시어를 고르세요. 기회는 한 번이에요.</p><div class="opts two words">'+R.words.map(function(w,k){
       return '<button type="button" class="opt" data-a="gpick" data-k="'+k+'" aria-pressed="'+(g.pick===k)+'">'+esc(w)+'</button>';
-    }).join('')+'</div></div><div class="acts stick"><button type="button" class="btn go" data-a="gcast"'+(g.pick===null?' disabled':'')+'>'+(g.pick===null?'단어를 골라요':esc(R.words[g.pick])+', 확정')+'</button></div>';
+    }).join('')+'</div></div><div class="acts stick"><button type="button" class="btn go" data-a="gcast"'+(g.pick===null?' disabled':'')+'>'+(g.pick===null?'확정':esc(R.words[g.pick])+' 확정')+'</button></div>';
 }
 function vResult(){
   var o=R.outcome, a=R.accused, title, sub, roleName={liar:'라이어',spy:'스파이',citizen:'시민'};
-  if(!R.citizens&&R.roles.every(function(r){return r==='liar';})){ title='전원 라이어!'; sub='시민은 처음부터 없었어요.'+(o==='steal'?' 그 와중에 '+jo(a,'이','가')+' 제시어를 맞혔어요.':''); }
-  else if(o==='caught'){ title=R.citizens?'시민 승리':'라이어 검거'; sub=nm(a)+' 검거 완료. 제시어도 틀렸어요.'+(R.g&&R.g.pick!==null?' 고른 단어는 '+esc(R.words[R.g.pick])+'.':''); }
+  if(!R.citizens&&R.roles.every(function(r){return r==='liar';})){ title='전원 라이어'; sub=(o==='steal'?jo(a,'이','가')+' 제시어를 맞혔어요.':''); }
+  else if(o==='caught'){ title=R.citizens?'시민 승리':'라이어 패배'; sub=jo(a,'이','가')+' 잡혔고 제시어도 틀렸어요.'+(R.g&&R.g.pick!==null?' 고른 단어: '+esc(R.words[R.g.pick]):''); }
   else if(o==='steal'){ title='라이어 역전승'; sub=jo(a,'이','가')+' 잡혔지만 제시어를 맞혔어요.'; }
-  else { title='라이어 승리'; sub=a===null?'아무도 못 잡았어요.':jo(a,'은','는')+' '+(R.roles[a]==='citizen'?'시민이었어요.':'스파이였어요.'); }
-  var h='<div><h1 class="name xl '+(o==='caught'?'town':'liar')+'" tabindex="-1">'+title+'</h1><p class="lead">'+sub+'</p></div>';
+  else { title='라이어 승리'; sub=a===null?'재투표도 동점이었어요.':jo(a,'은','는')+' '+(R.roles[a]==='citizen'?'시민이었어요.':'스파이였어요.'); }
+  var h='<div><h1 class="name xl '+(o==='caught'?'town':'liar')+'" tabindex="-1">'+title+'</h1>'+(sub?'<p class="lead">'+sub+'</p>':'')+'</div>';
   h+='<div class="answer"><div><span>'+esc(R.cat)+'</span><b>'+esc(R.word)+'</b></div>'+(R.fake?'<div><span>라이어가 받은 단어</span><b>'+esc(R.fake)+'</b></div>':'')+'</div>';
   h+='<section class="sec"><h2>정체</h2><div class="rows">'+S.players.map(function(_,i){
     var r=R.roles[i], vt=R.finalVotes&&R.finalVotes[i]!==undefined?R.finalVotes[i]:null;
     return '<div class="r '+r+'"><span class="n">'+nm(i)+'</span><span class="v">'+roleName[r]+'</span><span class="m">'+(vt!==null?nm(vt)+'에게 투표':'투표 안 함')+(R.deltas[i]?' · <span class="gain">+'+R.deltas[i]+'점</span>':'')+'</span></div>';
   }).join('')+'</div></section>';
-  h+='<section class="sec">'+scoreHead()+scoreInfo()+scoreRows(R.deltas)+(R.citizens?'':'<p class="note">시민이 없는 판이라 이번 판은 점수가 없어요.</p>')+'</section>';
+  h+='<section class="sec">'+head('score','점수')+infoBox('score')+scoreRows(R.deltas)+(R.citizens?'':'<p class="note">시민이 없어 점수를 매기지 않아요.</p>')+'</section>';
   h+='<div class="acts"><button type="button" class="btn go" data-a="again">한 판 더</button><button type="button" class="btn sm" data-a="to-setup">설정 바꾸기</button></div>';
   return h;
 }
@@ -622,7 +648,7 @@ var ACT={
     clamp();
   },
   'theme':function(){ S.theme=isDark()?'light':'dark'; applyTheme(); },
-  'info':function(){ S.info=!S.info; },
+  'info':function(d){ S.info=S.info===d.k?null:d.k; },
   'names':function(){ S.namesOpen=true; },
   'set':function(d){
     var k=d.k, v=d.v;
@@ -638,21 +664,21 @@ var ACT={
   'cats-none':function(){ S.cats=[]; },
   'ai-fill':function(){
     var topic=S.draft.name.trim();
-    if(!topic){ S.draftErr='주제를 먼저 적어 주세요.'; return; }
+    if(!topic){ S.draftErr='주제 이름을 적어 주세요.'; return; }
     if(!AI||S.aiBusy) return;
     S.aiBusy=true; S.draftErr='';
     var done=function(){ S.aiBusy=false; if(S.screen==='setup') render(); };
     AI('라이어 게임에 쓸 제시어를 만들어 줘.\n주제: '+topic+'\n조건: 이 주제에 속하는 한국어 단어나 짧은 명사구 20개. 한국의 20~30대 친구들이 대부분 아는 것만. 서로 겹치거나 너무 비슷한 것은 빼고, 하나는 12자 이내. 비속어와 혐오 표현은 빼.\n출력: JSON 문자열 배열 하나만. 다른 말은 쓰지 마.',{modelTier:'quick',cache:false}).then(function(res){
       var got=parseWords(res&&res.text||''), have=parseWords(S.draft.words), seen={};
       var all=have.concat(got).filter(function(w){ if(seen[w]) return false; seen[w]=1; return true; });
-      if(got.length<4) S.draftErr='단어를 못 받아 왔어요. 주제를 바꿔서 다시 해 보세요.';
+      if(got.length<4) S.draftErr='단어를 만들지 못했어요. 주제 이름을 바꿔 보세요.';
       else { S.draft.words=all.join(', '); S.draftErr=''; }
       done();
     },function(e){
       var c=e&&e.code;
-      if(c==='not_granted'){ AI=null; S.draftErr='AI 사용을 허용하지 않아서 직접 적어야 해요.'; }
-      else if(c==='rate_limited') S.draftErr='잠깐 쉬었다가 다시 눌러 주세요.';
-      else S.draftErr='AI가 응답하지 않았어요. 인터넷을 확인하고 다시 해 보세요.';
+      if(c==='not_granted'){ AI=null; S.draftErr='AI를 쓸 수 없어요. 단어를 직접 적어 주세요.'; }
+      else if(c==='rate_limited') S.draftErr='잠시 후 다시 시도해 주세요.';
+      else S.draftErr='응답이 없어요. 인터넷 연결을 확인해 주세요.';
       done();
     });
   },
@@ -740,7 +766,7 @@ function start(data){
   if(data&&data.S){ for(k in data.S) S[k]=data.S[k]; R=data.R||null; }
   else if(rd&&rd.R&&VIEWS[rd.screen]&&Date.now()-rd.at<3*3600*1000&&rd.R.roles&&rd.R.roles.length===(S.players||[]).length){ R=rd.R; S.screen=rd.screen; }
   if(!Array.isArray(S.used)) S.used=[];
-  S.quit=false; S.skip=false; S.info=false;
+  S.quit=false; S.skip=false; S.info=null;
   if(S.theme!=='dark'&&S.theme!=='light') S.theme='auto';
   applyTheme();
   if(!Array.isArray(S.players)||S.players.length<MINP) S.players=defaults().players;
