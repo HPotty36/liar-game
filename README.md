@@ -5,7 +5,7 @@
 <h3 align="center">폰 하나를 돌려가며 하는 라이어 게임</h3>
 
 <p align="center">
-  설치도 가입도 없습니다. 파일 하나를 열면 바로 시작합니다.
+  가입도 빌드도 없습니다. 열면 바로 시작하고, 홈 화면에 설치하면 오프라인에서도 됩니다.
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 
 <p align="center">
   <img alt="3~12명" src="https://img.shields.io/badge/인원-3~12명-3447e8">
-  <img alt="파일 1개" src="https://img.shields.io/badge/파일-1개-161513">
+  <img alt="PWA" src="https://img.shields.io/badge/PWA-오프라인-161513">
   <img alt="의존성 0" src="https://img.shields.io/badge/의존성-0-63615c">
 </p>
 
@@ -34,6 +34,15 @@
 
 - 인터넷이 없으면 글꼴만 기기 기본 고딕으로 바뀌고, 게임은 그대로 됩니다.
 - 설정, 점수, 진행 중인 판은 그 폰의 브라우저에 저장됩니다. 화면이 꺼지거나 새로고침해도 하던 판이 이어집니다.
+
+### 앱처럼 설치하기 (PWA)
+
+https 주소로 올려 두면 홈 화면에 설치해서 앱처럼 쓸 수 있습니다. 한 번 열어 둔 뒤에는 인터넷이 없어도 열립니다.
+
+- **아이폰**: Safari에서 열고 공유 버튼 → **홈 화면에 추가**
+- **안드로이드**: Chrome에서 열고 메뉴 → **앱 설치** 또는 **홈 화면에 추가**
+
+`manifest.webmanifest`가 앱 이름과 아이콘을, `sw.js`가 오프라인 캐시를 맡습니다. 파일을 고쳐 올리면 다음에 앱을 열 때 새 버전을 받아 두고, 그다음에 열 때 적용됩니다.
 
 ## 한 판의 흐름
 
@@ -77,12 +86,15 @@
 
 ## 개발
 
-빌드 과정이 없습니다. 마크업, 스타일, 스크립트가 모두 `index.html` 한 파일에 있습니다.
+빌드 과정이 없습니다. 마크업, 스타일, 스크립트가 모두 `index.html` 한 파일에 있고, 나머지는 설치와 오프라인을 위한 파일입니다.
 
 ```
-index.html           게임 전체
-tests/flow.test.js   브라우저 없이 한 판을 끝까지 돌려 보는 테스트
-docs/                README에 쓰는 이미지
+index.html             게임 전체
+manifest.webmanifest   설치용 앱 정보
+sw.js                  오프라인 캐시
+icons/                 앱 아이콘
+tests/flow.test.js     브라우저 없이 한 판을 끝까지 돌려 보는 테스트
+docs/                  README에 쓰는 이미지
 ```
 
 ```bash

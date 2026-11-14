@@ -2,7 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="폰 하나를 돌려가며 하는 라이어 게임">
+<meta name="theme-color" content="#f4f3f1" id="themeColor">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="라이어 게임">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>라이어 게임</title>
 <!-- Pretendard loads where the host allows it (a plain file or GitHub Pages). Inside a Claude artifact the link is blocked and the system Korean font is used. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -39,7 +48,7 @@ html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;letter-spacing:-.01em;
   word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
 #app{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg)}
-.col{max-width:460px;margin:0 auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px;min-height:100%}
+.col{max-width:460px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;min-height:100%}
 button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -88,7 +97,7 @@ textarea{min-height:92px;resize:vertical}
 .tile .rm{padding:6px 10px 6px 0;font-size:17px}
 .tile.on{background:var(--fill);box-shadow:none;color:var(--ink)}
 .form{display:flex;flex-direction:column;gap:8px}
-.bar{position:sticky;bottom:0;margin:auto -20px -24px;padding:22px 20px 18px;background:linear-gradient(to top,var(--bg) 86%,transparent);display:flex;flex-direction:column;gap:8px}
+.bar{position:sticky;bottom:0;margin:auto -20px -24px;padding:22px 20px max(18px,env(safe-area-inset-bottom));margin-bottom:calc(-1 * max(24px,env(safe-area-inset-bottom)));background:linear-gradient(to top,var(--bg) 86%,transparent);display:flex;flex-direction:column;gap:8px}
 .bar .note{text-align:center}
 .switch{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:8px 0;min-height:44px;color:var(--sub);font-size:15px;font-weight:600}
 .switch i{position:relative;width:46px;height:28px;border-radius:99px;background:var(--edge);transition:background .15s}
@@ -291,6 +300,7 @@ function isDark(){
 function applyTheme(){
   var el=document.documentElement;
   if(S.theme==='dark'||S.theme==='light') el.setAttribute('data-mode',S.theme); else el.removeAttribute('data-mode');
+  var m=document.getElementById('themeColor'); if(m&&m.setAttribute) m.setAttribute('content',isDark()?'#000000':'#f4f3f1');
 }
 function maxLiars(n,spy){ return Math.max(1,n-(spy?1:0)); }
 function clamp(){
@@ -722,6 +732,10 @@ function start(data){
 if(window.claude&&window.claude.use) try{
   window.claude.use('sample').then(function(fn){ if(fn){ AI=fn; if(S&&S.screen==='setup') render(); } },function(){});
 }catch(e){}
+/* Installed-app support. Service workers need https (or localhost) and are refused inside a Claude artifact, so this is skipped there. */
+if(!window.claude&&navigator.serviceWorker&&(location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 var hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot) try{ hot.snapshot(function(){ return {S:S,R:R}; }); }catch(e){}
 if(hot&&hot.ready) hot.ready(start); else start((hot&&hot.data)||{});
