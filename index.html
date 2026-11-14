@@ -255,7 +255,7 @@ var S, R=null, T=null, AI=null, audio=null, lastScreen=null, lastKey=null, lastR
 
 function defaults(){
   return {players:[1,2,3,4].map(function(i){return {name:'',score:0};}),
-    mode:'basic',liars:1,spy:false,cats:Object.keys(BUILTIN),custom:{},
+    mode:'basic',liars:1,spy:0,cats:Object.keys(BUILTIN),custom:{},
     speakSec:30,laps:1,discussSec:120,screen:'setup',used:[],draft:{name:'',words:''},draftErr:'',
     theme:'auto',namesOpen:false,catOpen:false,catsOpen:false,aiBusy:false,quit:false,skip:false};
 }
@@ -302,13 +302,15 @@ function applyTheme(){
   if(S.theme==='dark'||S.theme==='light') el.setAttribute('data-mode',S.theme); else el.removeAttribute('data-mode');
   var m=document.getElementById('themeColor'); if(m&&m.setAttribute) m.setAttribute('content',isDark()?'#000000':'#f4f3f1');
 }
-function maxLiars(n,spy){ return Math.max(1,n-(spy?1:0)); }
+/* Liars and spies share the seats: at least one liar, and together never more than the players. */
+function maxLiars(n,spy){ return Math.max(1,n-spy); }
 function clamp(){
   var n=S.players.length;
-  if(n<4) S.spy=false;
+  S.spy=Math.max(0,Math.min(n-1,Math.floor(+S.spy||0)));
   var m=maxLiars(n,S.spy);
   if(S.liars>m) S.liars=m;
   if(S.liars<1) S.liars=1;
+  if(S.spy>n-S.liars) S.spy=n-S.liars;
   var cats=allCats();
   S.cats=S.cats.filter(function(c){return cats[c];});
 }
@@ -373,7 +375,7 @@ function startRound(){
   var n=S.players.length, idx=shuffle(S.players.map(function(_,i){return i;}));
   var roles=S.players.map(function(){return 'citizen';}), i;
   for(i=0;i<S.liars;i++) roles[idx[i]]='liar';
-  if(S.spy) roles[idx[S.liars]]='spy';
+  for(i=0;i<S.spy;i++) roles[idx[S.liars+i]]='spy';
   /* Speaking always starts with player 1 and goes round in seat order. */
   var order=[];
   for(i=0;i<n;i++) order.push(i);
@@ -432,7 +434,7 @@ function topBar(step){
 }
 function summary(){
   var n=S.players.length;
-  return n+'명 · '+(S.mode==='fool'?'바보 모드':'기본 모드')+' · 라이어 '+(S.liars>=n?'전원':S.liars+'명')+(S.spy?' · 스파이 1명':'');
+  return n+'명 · '+(S.mode==='fool'?'바보 모드':'기본 모드')+' · 라이어 '+(S.liars>=n?'전원':S.liars+'명')+(S.spy?' · 스파이 '+S.spy+'명':'');
 }
 function vSetup(){
   var n=S.players.length, mL=maxLiars(n,S.spy), cats=allCats(), hasScore=S.players.some(function(p){return p.score;});
@@ -449,8 +451,8 @@ function vSetup(){
     '<div class="line"><span>모드</span>'+seg('mode',[['basic','기본'],['fool','바보']],S.mode)+'</div>'+
     '<p class="note">'+(S.mode==='basic'?'라이어는 주제만 알아요.':'라이어는 다른 단어를 받고, 자기가 라이어인 줄 몰라요.')+'</p>'+
     '<div class="line"><span>라이어</span><div class="count"><button type="button" class="sq" data-a="liars" data-d="-1" aria-label="라이어 줄이기"'+(S.liars<=1?' disabled':'')+'>−</button><b>'+S.liars+'명</b><button type="button" class="sq" data-a="liars" data-d="1" aria-label="라이어 늘리기"'+(S.liars>=mL?' disabled':'')+'>+</button></div></div>'+
-    (S.liars+(S.spy?1:0)>=n?'<p class="warn">시민이 한 명도 없는 판이에요. 점수는 안 매겨요.</p>':(S.mode==='fool'&&S.liars*2>=n?'<p class="warn">라이어가 절반 이상이면 가짜 단어가 다수가 돼요.</p>':''))+
-    '<div class="line"><span>스파이</span>'+(n<4?'<span class="note" style="text-align:right">4명부터 넣을 수 있어요</span>':seg('spy',[['0','없음'],['1','1명']],S.spy?'1':'0'))+'</div>'+
+    (S.liars+S.spy>=n?'<p class="warn">시민이 한 명도 없는 판이에요. 점수는 안 매겨요.</p>':(S.mode==='fool'&&S.liars*2>=n?'<p class="warn">라이어가 절반 이상이면 가짜 단어가 다수가 돼요.</p>':''))+
+    '<div class="line"><span>스파이</span><div class="count"><button type="button" class="sq" data-a="spies" data-d="-1" aria-label="스파이 줄이기"'+(S.spy<=0?' disabled':'')+'>−</button><b>'+S.spy+'명</b><button type="button" class="sq" data-a="spies" data-d="1" aria-label="스파이 늘리기"'+(S.spy>=n-S.liars?' disabled':'')+'>+</button></div></div>'+
     (S.spy?'<p class="note">스파이는 제시어를 알지만 라이어 편이에요.</p>':'')+'</section>';
 
   var names=Object.keys(cats).sort(function(x,y){ return (S.custom[y]?1:0)-(S.custom[x]?1:0); });
@@ -601,10 +603,11 @@ var ACT={
   'names':function(){ S.namesOpen=true; },
   'set':function(d){
     var k=d.k, v=d.v;
-    if(k==='mode') S.mode=v; else if(k==='spy') S.spy=v==='1'; else S[k]=+v;
+    if(k==='mode') S.mode=v; else S[k]=+v;
     clamp();
   },
-  'liars':function(d){ S.liars+=+d.d; clamp(); },
+  'liars':function(d){ var n=S.players.length; S.liars=Math.max(1,Math.min(n-S.spy,S.liars+(+d.d))); clamp(); },
+  'spies':function(d){ var n=S.players.length; S.spy=Math.max(0,Math.min(n-S.liars,S.spy+(+d.d))); clamp(); },
   'cat':function(d){ var i=S.cats.indexOf(d.c); if(i>=0) S.cats.splice(i,1); else S.cats.push(d.c); },
   'del-cat':function(d){ delete S.custom[d.c]; clamp(); },
   'cats-toggle':function(){ S.catsOpen=!S.catsOpen; },

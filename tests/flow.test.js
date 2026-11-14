@@ -29,9 +29,10 @@ const click = (a, ds = {}) => {
 const round = () => JSON.parse(store[KEY]).round.R;
 const heading = () => app.innerHTML.match(/<h1[^>]*>([^<]+)/)[1];
 
-function play({ set = {}, add = 0, liars = 0, target, right = false }) {
+function play({ set = {}, add = 0, liars = 0, spies = 0, target, right = false }) {
   for (const [k, v] of Object.entries(set)) click('set', { k, v: String(v) });
   for (let i = 0; i < add; i++) click('pc', { d: '1' });
+  for (let i = 0; i < Math.abs(spies); i++) click('spies', { d: spies > 0 ? '1' : '-1' });
   for (let i = 0; i < liars; i++) click('liars', { d: '1' });
   click('start');
   const n = +app.innerHTML.match(/카드 확인 1\/(\d+)/)[1];
@@ -102,11 +103,15 @@ r = play({ set: { mode: 'fool', speakSec: 0, discussSec: 0, laps: 2 }, add: 3, l
 assert.strictEqual(r.roles.filter((x) => x === 'liar').length, 3);
 assert.strictEqual(r.title, '시민 승리');
 
-r = play({ set: { spy: 1 }, liars: 9, target: voteLiar });
+r = play({ spies: 2, target: voteLiar });
+assert.strictEqual(r.roles.filter((x) => x === 'spy').length, 2, '스파이 2명');
+assert.strictEqual(r.roles.filter((x) => x === 'liar').length, 3);
+
+r = play({ liars: 9, target: voteLiar });
 assert.strictEqual(r.roles.filter((x) => x === 'citizen').length, 0);
 assert.strictEqual(r.gains, 0, '시민 없는 판은 점수 없음');
 
-r = play({ set: { spy: 0, mode: 'basic' }, liars: 9, target: voteNext });
+r = play({ set: { mode: 'basic' }, spies: -2, liars: 9, target: voteNext });
 assert.strictEqual(r.title, '전원 라이어!'); assert.strictEqual(r.gains, 0);
 
 click('start');
@@ -166,5 +171,5 @@ for (const [name, words] of Object.entries(BUILTIN)) {
   click('cat-open');
   assert(!has('ai-fill'), 'Claude 밖에서는 AI 버튼이 없어야 함');
 
-  console.log('ok: 판 8개, 기본 주제 ' + Object.keys(BUILTIN).length + '개, AI 채우기 통과');
+  console.log('ok: 판 9개, 기본 주제 ' + Object.keys(BUILTIN).length + '개, AI 채우기 통과');
 })().catch((e) => { console.error(e); process.exit(1); });
