@@ -76,6 +76,7 @@ textarea{min-height:84px;resize:vertical}
 .btn:active:not(:disabled){transform:translateY(2px)}
 .acts{display:flex;flex-direction:column;gap:8px;margin-top:auto}
 .acts .row{display:flex;justify-content:space-between}
+.btn.half{flex:1 1 0;width:auto}
 .acts.stick{position:sticky;bottom:0;padding:10px 0 12px;margin-bottom:-12px;background:var(--felt)}
 header,.stage>div:not([class]),.col>div:not([class]){display:flex;flex-direction:column;gap:8px}
 
@@ -146,27 +147,67 @@ header,.stage>div:not([class]),.col>div:not([class]){display:flex;flex-direction
 'use strict';
 var BUILTIN={
  '음식':['김치찌개','떡볶이','삼겹살','치킨','피자','초밥','라면','비빔밥','짜장면','햄버거','냉면','김밥','파스타','순대국','마라탕','돈가스','족발','칼국수','불고기','타코'],
- '동물':['강아지','고양이','코끼리','기린','펭귄','호랑이','돌고래','토끼','판다','캥거루','독수리','악어','고슴도치','수달','낙타','문어','여우','하마','올빼미','카멜레온'],
+ '분식':['순대','튀김','어묵','쫄면','만두','핫도그','토스트','컵밥','주먹밥','라볶이','우동','잔치국수','비빔국수','김말이','오징어튀김','계란빵','닭꼬치','떡꼬치','군만두','치즈 김밥'],
+ '과일':['사과','배','포도','수박','참외','딸기','바나나','망고','복숭아','자두','귤','오렌지','파인애플','키위','체리','블루베리','감','석류','멜론','레몬'],
+ '채소':['배추','무','당근','양파','마늘','오이','가지','호박','시금치','상추','깻잎','고추','파프리카','브로콜리','감자','고구마','버섯','콩나물','대파','토마토'],
+ '디저트':['마카롱','티라미수','붕어빵','호떡','빙수','아이스크림','와플','도넛','케이크','푸딩','탕후루','약과','크루아상','초콜릿','젤리','츄러스','에그타르트','찹쌀떡','쿠키','소금빵'],
+ '음료':['아메리카노','콜라','사이다','식혜','수정과','우유','두유','녹차','버블티','레모네이드','스무디','핫초코','에너지 드링크','이온 음료','매실차','유자차','카페라테','토마토 주스','탄산수','미숫가루'],
+ '술과 안주':['소주','맥주','막걸리','와인','하이볼','소맥','위스키','칵테일','노가리','골뱅이무침','먹태','닭발','오돌뼈','계란말이','어묵탕','파전','마른오징어','감자튀김','두부김치','나초'],
+ '편의점':['삼각김밥','컵라면','도시락','바나나우유','핫바','소시지','샌드위치','컵얼음','숙취해소제','캔커피','초코바','껌','생수','구운 계란','요구르트','봉지 과자','호빵','즉석 떡볶이','택배 접수','1+1 행사'],
  '장소':['편의점','찜질방','노래방','공항','도서관','놀이공원','영화관','병원','헬스장','수영장','지하철역','PC방','미용실','캠핑장','박물관','백화점','야구장','고속도로 휴게소','워터파크','전통시장'],
- '직업':['의사','소방관','요리사','유튜버','경찰','선생님','파일럿','프로게이머','아이돌','변호사','택배기사','바리스타','농부','기자','수의사','통역사','사진작가','개발자','아나운서','헬스 트레이너'],
- '스포츠':['축구','야구','농구','배드민턴','탁구','수영','볼링','골프','테니스','스키','양궁','태권도','클라이밍','서핑','마라톤','배구','복싱','컬링','펜싱','당구'],
- '물건':['우산','충전기','칫솔','선풍기','냉장고','이어폰','안경','손톱깎이','드라이기','전자레인지','리모컨','베개','지갑','보조배터리','슬리퍼','텀블러','마스크','가위','시계','거울'],
+ '동네 가게':['세탁소','철물점','문구점','빵집','정육점','꽃집','약국','안경점','부동산','카페','치킨집','분식집','중국집','당구장','네일숍','사진관','은행','우체국','주민센터','떡집'],
+ '집':['거실','부엌','화장실','베란다','현관','옷장','침대','소파','식탁','책상','신발장','창문','천장','계단','옥상','지하실','다락방','마당','차고','엘리베이터'],
  '여행지':['제주도','부산','도쿄','오사카','파리','뉴욕','방콕','다낭','하와이','런던','로마','강릉','경주','타이베이','홍콩','바르셀로나','삿포로','싱가포르','여수','발리'],
- '여행 중':['여권','면세점','숙소','렌터카','기내식','조식 뷔페','셀카봉','환전','야시장','온천','기념품','비행기 지연','멀미','캐리어','일출','바비큐','불꽃놀이','계곡','게스트하우스','노을']
+ '여행 중':['여권','면세점','숙소','렌터카','기내식','조식 뷔페','셀카봉','환전','야시장','온천','기념품','비행기 지연','멀미','캐리어','일출','바비큐','불꽃놀이','계곡','게스트하우스','노을'],
+ '캠핑과 펜션':['텐트','모닥불','마시멜로','랜턴','침낭','모기향','해먹','아이스박스','숯','장작','코펠','버너','별 보기','수영장','노래방 기계','폭죽','고기 굽기','설거지 당번','늦잠','단체 사진'],
+ '한국 도시':['서울','부산','대구','인천','광주','대전','울산','수원','춘천','강릉','전주','경주','여수','목포','제주','속초','안동','통영','포항','천안'],
+ '나라':['미국','일본','중국','프랑스','영국','독일','이탈리아','스페인','브라질','호주','캐나다','인도','태국','베트남','이집트','튀르키예','멕시코','러시아','스위스','아르헨티나'],
+ '놀이공원':['롤러코스터','바이킹','회전목마','범퍼카','자이로드롭','관람차','귀신의 집','후룸라이드','머리띠','퍼레이드','자유이용권','대기 줄','회전컵','사파리','솜사탕','우선 탑승권','미아보호소','기념품 가게','야간 개장','교복 대여'],
+ '직업':['의사','소방관','요리사','유튜버','경찰','선생님','파일럿','프로게이머','아이돌','변호사','택배기사','바리스타','농부','기자','수의사','통역사','사진작가','개발자','아나운서','헬스 트레이너'],
+ '학교':['급식','수학여행','체육대회','조회','야자','매점','교무실','칠판','사물함','반장','시험','방학','교복','종례','급훈','짝꿍','운동장','보건실','도서실','졸업식'],
+ '과목':['국어','수학','영어','과학','사회','역사','체육','음악','미술','도덕','기술','가정','한문','물리','화학','생물','지리','정보','지구과학','윤리'],
+ '대학 생활':['수강신청','MT','개강','종강','과제','조별 과제','학점','동아리','축제','휴학','복학','장학금','자취','학식','교수님','시험 기간','밤샘','졸업 논문','새내기','과잠'],
+ '회사':['회식','야근','월급','연차','회의','출근','퇴근','점심 메뉴','명함','보고서','사직서','승진','인턴','팀장','재택근무','워크숍','법인카드','탕비실','면접','성과급'],
+ '군대':['훈련소','행군','불침번','PX','휴가','전역','이등병','병장','점호','유격','화생방','짬밥','관물대','생활관','위병소','제초','초코파이','군화','깔깔이','예비군'],
+ '돈':['용돈','적금','주식','로또','세금','대출','이자','현금','카드','더치페이','축의금','세뱃돈','월세','전세','보너스','비상금','코인','저금통','환율','연말정산'],
+ '물건':['우산','충전기','칫솔','선풍기','냉장고','이어폰','안경','손톱깎이','드라이기','전자레인지','리모컨','베개','지갑','보조배터리','슬리퍼','텀블러','마스크','가위','시계','거울'],
+ '가전':['세탁기','에어컨','청소기','TV','공기청정기','식기세척기','건조기','밥솥','에어프라이어','가습기','제습기','로봇청소기','정수기','인덕션','전기장판','믹서기','토스터','커피머신','안마의자','스피커'],
+ '옷':['청바지','후드티','패딩','코트','정장','한복','수영복','잠옷','양말','모자','목도리','장갑','운동화','구두','원피스','조끼','레깅스','넥타이','반바지','트레이닝복'],
+ '문구':['연필','지우개','볼펜','형광펜','자','풀','테이프','스테이플러','포스트잇','공책','필통','샤프','수정테이프','컴퍼스','클립','색연필','크레파스','다이어리','계산기','스티커'],
+ '탈것':['버스','지하철','택시','기차','비행기','배','자전거','오토바이','킥보드','트럭','구급차','소방차','케이블카','헬리콥터','요트','잠수함','열기구','스쿠터','캠핑카','유모차'],
+ '신체':['눈','코','입','귀','손','발','무릎','팔꿈치','어깨','배꼽','눈썹','혀','이마','턱','손톱','발바닥','엉덩이','목','머리카락','새끼손가락'],
+ '동물':['강아지','고양이','코끼리','기린','펭귄','호랑이','돌고래','토끼','판다','캥거루','독수리','악어','고슴도치','수달','낙타','문어','여우','하마','올빼미','카멜레온'],
+ '바다 생물':['고래','상어','오징어','해파리','불가사리','거북이','새우','게','가재','조개','해마','가오리','참치','고등어','멸치','복어','바다표범','산호','전복','성게'],
+ '곤충과 벌레':['나비','벌','개미','모기','파리','매미','잠자리','메뚜기','사마귀','무당벌레','바퀴벌레','거미','지렁이','달팽이','장수풍뎅이','사슴벌레','반딧불이','귀뚜라미','송충이','노린재'],
+ '날씨와 자연':['비','눈','태풍','번개','무지개','안개','우박','황사','폭염','한파','장마','소나기','이슬','서리','지진','화산','파도','일식','오로라','별똥별'],
+ '명절과 기념일':['설날','추석','크리스마스','어린이날','어버이날','밸런타인데이','핼러윈','빼빼로데이','광복절','한글날','새해','스승의날','만우절','김장','벚꽃놀이','단풍놀이','첫눈','복날','대보름','생일'],
+ '색깔':['빨강','주황','노랑','초록','파랑','남색','보라','분홍','하늘색','갈색','검정','하양','회색','금색','은색','베이지','민트','연두','자주','카키'],
+ '스포츠':['축구','야구','농구','배드민턴','탁구','수영','볼링','골프','테니스','스키','양궁','태권도','클라이밍','서핑','마라톤','배구','복싱','컬링','펜싱','당구'],
+ '취미':['낚시','등산','캠핑','독서','뜨개질','요리','사진','그림','춤','노래','러닝','요가','필라테스','헬스','자전거','게임','영화 감상','여행','베이킹','식물 키우기'],
+ '악기':['피아노','기타','드럼','바이올린','첼로','플루트','트럼펫','색소폰','하모니카','리코더','우쿨렐레','장구','가야금','꽹과리','탬버린','실로폰','베이스','오카리나','캐스터네츠','트라이앵글'],
+ '음악 장르':['발라드','힙합','트로트','록','재즈','클래식','EDM','R&B','동요','국악','케이팝','인디','레게','메탈','OST','민요','캐럴','디스코','펑크','자장가'],
+ '영화 장르':['로맨스','액션','공포','코미디','SF','판타지','스릴러','다큐멘터리','애니메이션','뮤지컬','전쟁','좀비','재난','범죄','사극','히어로','추리','성장','청춘','첩보'],
+ '게임':['롤','오버워치','배틀그라운드','마인크래프트','스타크래프트','메이플스토리','카트라이더','FC 온라인','서든어택','테트리스','포켓몬','동물의 숲','젤다','마리오 카트','로블록스','발로란트','디아블로','리니지','던전앤파이터','쿠키런'],
+ '놀이와 보드게임':['윷놀이','화투','젠가','루미큐브','할리갈리','마피아','부루마불','체스','바둑','장기','오목','다트','포커','우노','숨바꼭질','무궁화 꽃이 피었습니다','공기놀이','딱지치기','제기차기','땅따먹기'],
+ '옛이야기와 동화':['흥부와 놀부','콩쥐팥쥐','심청전','춘향전','토끼와 거북이','해와 달이 된 오누이','선녀와 나무꾼','혹부리 영감','금도끼 은도끼','개미와 베짱이','신데렐라','백설공주','인어공주','피노키오','빨간 모자','아기 돼지 삼형제','헨젤과 그레텔','잭과 콩나무','미운 오리 새끼','성냥팔이 소녀'],
+ '초능력과 판타지':['투명 인간','순간 이동','시간 여행','하늘 날기','독심술','염력','불사신','변신','괴력','예지력','드래곤','마법사','요정','유니콘','뱀파이어','늑대인간','좀비','인어','도깨비','구미호'],
+ '인터넷':['인스타그램','유튜브','카카오톡','틱톡','넷플릭스','네이버','구글','좋아요','댓글','구독','라이브 방송','쇼츠','밈','이모티콘','단톡방','프로필 사진','스토리','알고리즘','언팔','읽음 표시'],
+ '감정':['기쁨','슬픔','분노','설렘','질투','부끄러움','외로움','뿌듯함','억울함','지루함','긴장','후회','그리움','짜증','감동','놀람','공포','안도','민망함','허무함'],
+ '연애':['썸','소개팅','고백','첫사랑','짝사랑','이별','기념일','커플링','데이트','밀당','프러포즈','결혼식','권태기','재회','읽씹','애칭','환승','삼각관계','장거리 연애','100일']
 };
 var KEY='liar-party-v1', MINP=3, MAXP=12, GUARD=350;
 var app=document.getElementById('app');
-var S, R=null, T=null, audio=null, lastScreen=null, lastKey=null, lastRenderAt=0;
+var S, R=null, T=null, AI=null, audio=null, lastScreen=null, lastKey=null, lastRenderAt=0;
 
 function defaults(){
   return {players:[1,2,3,4].map(function(i){return {name:'',score:0};}),
     mode:'basic',liars:1,spy:false,cats:Object.keys(BUILTIN),custom:{},
     speakSec:30,laps:1,discussSec:120,screen:'setup',used:[],draft:{name:'',words:''},draftErr:'',
-    namesOpen:false,catOpen:false,quit:false,skip:false};
+    namesOpen:false,catOpen:false,catsOpen:false,aiBusy:false,quit:false,skip:false};
 }
 function loadSaved(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null')||{}; }catch(e){ return {}; } }
 function save(){
-  try{ localStorage.setItem(KEY,JSON.stringify({players:S.players,mode:S.mode,liars:S.liars,spy:S.spy,cats:S.cats,custom:S.custom,speakSec:S.speakSec,laps:S.laps,discussSec:S.discussSec,used:S.used,
+  try{ localStorage.setItem(KEY,JSON.stringify({players:S.players,mode:S.mode,liars:S.liars,spy:S.spy,cats:S.cats,custom:S.custom,speakSec:S.speakSec,laps:S.laps,discussSec:S.discussSec,used:S.used,catsV:2,
     round:(R&&S.screen!=='setup')?{R:R,screen:S.screen,at:Date.now()}:null})); }catch(e){}
 }
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -183,6 +224,17 @@ function batchim(s){
   return false;
 }
 function jo(i,a,b){ var s=raw(i); return esc(s)+(batchim(s)?a:b); }
+/* Words from a typed list or from an AI answer: a JSON array if there is one, otherwise lines and commas. */
+function parseWords(text){
+  var out=[], seen={}, a=text.indexOf('['), b=text.lastIndexOf(']'), list=null;
+  if(a>=0&&b>a){ try{ list=JSON.parse(text.slice(a,b+1)); }catch(e){ list=null; } }
+  if(!Array.isArray(list)) list=text.split(/[,\n]/);
+  list.forEach(function(w){
+    w=String(w).replace(/^[\s\-*·\d.)"'\[]+|[\s"'\],.]+$/g,'');
+    if(w&&w.length<=20&&!seen[w]&&out.length<40){ seen[w]=1; out.push(w); }
+  });
+  return out;
+}
 function maxLiars(n,spy){ return Math.max(1,n-(spy?1:0)); }
 function clamp(){
   var n=S.players.length;
@@ -321,23 +373,27 @@ function vSetup(){
 
   h+='<section class="sec"><h2>규칙</h2>'+
     '<div class="line"><span>모드</span>'+seg('mode',[['basic','기본'],['fool','바보']],S.mode)+'</div>'+
-    '<p class="note">'+(S.mode==='basic'?'라이어는 카테고리만 알아요.':'라이어는 다른 단어를 받고, 자기가 라이어인 줄 몰라요.')+'</p>'+
+    '<p class="note">'+(S.mode==='basic'?'라이어는 주제만 알아요.':'라이어는 다른 단어를 받고, 자기가 라이어인 줄 몰라요.')+'</p>'+
     '<div class="line"><span>라이어</span><div class="count"><button type="button" class="sq" data-a="liars" data-d="-1" aria-label="라이어 줄이기"'+(S.liars<=1?' disabled':'')+'>−</button><b>'+S.liars+'명</b><button type="button" class="sq" data-a="liars" data-d="1" aria-label="라이어 늘리기"'+(S.liars>=mL?' disabled':'')+'>+</button></div></div>'+
     (S.liars+(S.spy?1:0)>=n?'<p class="warn">시민이 한 명도 없는 판이에요. 점수는 안 매겨요.</p>':(S.mode==='fool'&&S.liars*2>=n?'<p class="warn">라이어가 절반 이상이면 가짜 단어가 다수가 돼요.</p>':''))+
     '<div class="line"><span>스파이</span>'+(n<4?'<span class="note" style="text-align:right">4명부터 넣을 수 있어요</span>':seg('spy',[['0','없음'],['1','1명']],S.spy?'1':'0'))+'</div>'+
     (S.spy?'<p class="note">스파이는 제시어를 알지만 라이어 편이에요.</p>':'')+'</section>';
 
-  h+='<section class="sec"><h2>제시어</h2><div class="tiles">'+Object.keys(cats).map(function(c){
+  var names=Object.keys(cats).sort(function(x,y){ return (S.custom[y]?1:0)-(S.custom[x]?1:0); });
+  var onN=names.filter(function(c){return S.cats.indexOf(c)>=0;}).length;
+  h+='<section class="sec"><div class="line"><h2>주제</h2><button type="button" class="text" data-a="cats-toggle">'+(S.catsOpen?'접기':'고르기')+'</button></div>'+
+    '<p class="note">'+names.length+'개 중 '+(onN?onN+'개에서':'전부에서')+' 무작위로 나와요.</p>';
+  if(S.catsOpen) h+='<div class="line"><button type="button" class="btn sm half" data-a="cats-all">전체 선택</button><button type="button" class="btn sm half" data-a="cats-none">전체 해제</button></div><div class="tiles">'+names.map(function(c){
     var on=S.cats.indexOf(c)>=0, cu=!!S.custom[c];
-    return '<span class="tile'+(on?' on':'')+'"><button type="button" data-a="cat" data-c="'+esc(c)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(c)+' <small>'+cats[c].length+'</small></button>'+(cu?'<button type="button" class="rm" data-a="del-cat" data-c="'+esc(c)+'" aria-label="'+esc(c)+' 지우기">×</button>':'')+'</span>';
+    return '<span class="tile'+(on?' on':'')+'"><button type="button" data-a="cat" data-c="'+esc(c)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(c)+'</button>'+(cu?'<button type="button" class="rm" data-a="del-cat" data-c="'+esc(c)+'" aria-label="'+esc(c)+' 지우기">×</button>':'')+'</span>';
   }).join('')+'</div>';
-  if(!S.cats.length) h+='<p class="warn">하나도 안 고르면 기본 카테고리 전체에서 나와요.</p>';
   if(S.catOpen) h+='<div class="form">'+
-    '<input type="text" id="ccName" maxlength="14" placeholder="카테고리 이름" value="'+esc(S.draft.name)+'" aria-label="카테고리 이름">'+
+    '<input type="text" id="ccName" maxlength="14" placeholder="주제 (예: 우리 과 교수님)" value="'+esc(S.draft.name)+'" aria-label="주제 이름">'+
+    (AI?'<button type="button" class="btn sm" data-a="ai-fill"'+(S.aiBusy?' disabled':'')+'>'+(S.aiBusy?'AI가 채우는 중…':'AI로 단어 채우기')+'</button>':'<p class="note">AI로 단어 채우기는 Claude에서 열었을 때만 쓸 수 있어요.</p>')+
     '<textarea id="ccWords" placeholder="단어를 쉼표나 줄바꿈으로 나눠서 4개 이상" aria-label="단어 목록">'+esc(S.draft.words)+'</textarea>'+
     (S.draftErr?'<p class="warn">'+esc(S.draftErr)+'</p>':'')+
-    '<button type="button" class="btn sm" data-a="add-cat">카테고리 저장</button><button type="button" class="text" data-a="cat-close">닫기</button></div>';
-  else h+='<button type="button" class="btn sm" data-a="cat-open">+ 카테고리 직접 만들기</button>';
+    '<button type="button" class="btn sm" data-a="add-cat">주제 저장</button><button type="button" class="text" data-a="cat-close">닫기</button></div>';
+  else h+='<button type="button" class="btn sm" data-a="cat-open">+ 주제 직접 만들기'+(AI?' · AI로 채우기':'')+'</button>';
   h+='</section>';
 
   h+='<section class="sec"><h2>시간</h2>'+
@@ -358,7 +414,7 @@ function scoreRows(deltas){
 }
 function wordSize(w){ return w.length<=4?'':(w.length<=7?' m':' s'); }
 function cardFace(i){
-  var r=R.roles[i], fool=S.mode==='fool', kind='카테고리 · '+esc(R.cat);
+  var r=R.roles[i], fool=S.mode==='fool', kind='주제 · '+esc(R.cat);
   if(r==='liar'&&!fool) return '<div class="kind">'+kind+'</div><div class="word">라이어</div><div class="tip">아는 척하세요. 걸려도 제시어만 맞히면 이겨요.</div>';
   if(r==='spy') return '<div class="kind">'+kind+' · 스파이</div><div class="word'+wordSize(R.word)+'">'+esc(R.word)+'</div><div class="tip">라이어 편이에요. 라이어가 안 잡히게 도와주세요.</div>';
   var w=(r==='liar')?R.fake:R.word;
@@ -380,7 +436,7 @@ function orderHTML(cur){
 }
 function vReady(){
   var p=R.order[0];
-  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name xl" tabindex="-1">'+nm(p)+'부터</h1><p class="lead">카테고리는 '+esc(R.cat)+'. 한 문장씩 돌아가며 설명해요.</p></div>'+orderHTML(p)+'</div>'+
+  return topBar(esc(R.cat))+'<div class="stage"><div><h1 class="name xl" tabindex="-1">'+nm(p)+'부터</h1><p class="lead">주제는 '+esc(R.cat)+'. 한 문장씩 돌아가며 설명해요.</p></div>'+orderHTML(p)+'</div>'+
     '<div class="acts"><button type="button" class="btn go" data-a="begin">설명 시작</button></div>';
 }
 function vSpeak(){
@@ -476,16 +532,39 @@ var ACT={
   'liars':function(d){ S.liars+=+d.d; clamp(); },
   'cat':function(d){ var i=S.cats.indexOf(d.c); if(i>=0) S.cats.splice(i,1); else S.cats.push(d.c); },
   'del-cat':function(d){ delete S.custom[d.c]; clamp(); },
+  'cats-toggle':function(){ S.catsOpen=!S.catsOpen; },
+  'cats-all':function(){ S.cats=Object.keys(allCats()); },
+  'cats-none':function(){ S.cats=[]; },
+  'ai-fill':function(){
+    var topic=S.draft.name.trim();
+    if(!topic){ S.draftErr='주제를 먼저 적어 주세요.'; return; }
+    if(!AI||S.aiBusy) return;
+    S.aiBusy=true; S.draftErr='';
+    var done=function(){ S.aiBusy=false; if(S.screen==='setup') render(); };
+    AI('라이어 게임에 쓸 제시어를 만들어 줘.\n주제: '+topic+'\n조건: 이 주제에 속하는 한국어 단어나 짧은 명사구 20개. 한국의 20~30대 친구들이 대부분 아는 것만. 서로 겹치거나 너무 비슷한 것은 빼고, 하나는 12자 이내. 비속어와 혐오 표현은 빼.\n출력: JSON 문자열 배열 하나만. 다른 말은 쓰지 마.',{modelTier:'quick',cache:false}).then(function(res){
+      var got=parseWords(res&&res.text||''), have=parseWords(S.draft.words), seen={};
+      var all=have.concat(got).filter(function(w){ if(seen[w]) return false; seen[w]=1; return true; });
+      if(got.length<4) S.draftErr='단어를 못 받아 왔어요. 주제를 바꿔서 다시 해 보세요.';
+      else { S.draft.words=all.join(', '); S.draftErr=''; }
+      done();
+    },function(e){
+      var c=e&&e.code;
+      if(c==='not_granted'){ AI=null; S.draftErr='AI 사용을 허용하지 않아서 직접 적어야 해요.'; }
+      else if(c==='rate_limited') S.draftErr='잠깐 쉬었다가 다시 눌러 주세요.';
+      else S.draftErr='AI가 응답하지 않았어요. 인터넷을 확인하고 다시 해 보세요.';
+      done();
+    });
+  },
   'cat-open':function(){ S.catOpen=true; },
   'cat-close':function(){ S.catOpen=false; S.draftErr=''; },
   'add-cat':function(){
-    var name=S.draft.name.trim(), seen={}, words=S.draft.words.split(/[,\n]/).map(function(w){return w.trim();}).filter(function(w){ if(!w||seen[w]) return false; seen[w]=1; return true; });
-    if(!name){ S.draftErr='카테고리 이름을 적어 주세요.'; return; }
+    var name=S.draft.name.trim(), words=parseWords(S.draft.words);
+    if(!name){ S.draftErr='주제 이름을 적어 주세요.'; return; }
     var own=Object.prototype.hasOwnProperty;
-    if(own.call(BUILTIN,name)||own.call(S.custom,name)||name==='__proto__'){ S.draftErr='같은 이름의 카테고리가 이미 있어요.'; return; }
+    if(own.call(BUILTIN,name)||own.call(S.custom,name)||name==='__proto__'){ S.draftErr='같은 이름의 주제가 이미 있어요.'; return; }
     if(words.length<4){ S.draftErr='단어가 '+words.length+'개예요. 4개 이상 적어 주세요.'; return; }
     S.custom[name]=words; if(S.cats.indexOf(name)<0) S.cats.push(name);
-    S.draft={name:'',words:''}; S.draftErr=''; S.catOpen=false;
+    S.draft={name:'',words:''}; S.draftErr=''; S.catOpen=false; S.catsOpen=true;
   },
   'reset-score':function(){ if(!S.quit){ S.quit=true; return; } S.players.forEach(function(p){p.score=0;}); S.quit=false; },
   'start':function(){ initAudio(); startRound(); },
@@ -565,11 +644,17 @@ function start(data){
   S.players.forEach(function(p,i){ if(/^플레이어 \d+$/.test(p.name||'')) p.name=''; });
   if(!S.custom||typeof S.custom!=='object') S.custom={};
   if(!Array.isArray(S.cats)) S.cats=Object.keys(BUILTIN);
+  if(sv.catsV!==2&&!(data&&data.S)) S.cats=Object.keys(allCats());
+  S.aiBusy=false; delete S.catsV;
   S.namesOpen=S.players.some(function(p){return (p.name||'').trim();});
   clamp();
   if(R){ R.seen=false; if(S.screen==='speak'||S.screen==='discuss') resumeTimer(); }
   render();
 }
+/* Asking Claude for words only exists when the page runs as a Claude artifact. Elsewhere AI stays null. */
+if(window.claude&&window.claude.use) try{
+  window.claude.use('sample').then(function(fn){ if(fn){ AI=fn; if(S&&S.screen==='setup') render(); } },function(){});
+}catch(e){}
 var hot=window.claude&&window.claude.hot;
 if(hot&&hot.snapshot) try{ hot.snapshot(function(){ return {S:S,R:R}; }); }catch(e){}
 if(hot&&hot.ready) hot.ready(start); else start((hot&&hot.data)||{});

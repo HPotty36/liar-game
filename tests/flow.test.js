@@ -112,4 +112,36 @@ click('start');
 boot();
 assert(app.innerHTML.includes('카드 확인 1/7'), '새로고침 후 진행 중인 판이 이어지지 않음');
 
-console.log('ok: 8개 시나리오 통과');
+// 기본 주제: 40개 이상, 주제마다 겹치지 않는 단어 20개
+const BUILTIN = (0, eval)('(' + js.match(/var BUILTIN=(\{[\s\S]*?\n\});/)[1] + ')');
+assert(Object.keys(BUILTIN).length >= 40, '기본 주제가 40개보다 적음');
+for (const [name, words] of Object.entries(BUILTIN)) {
+  assert.strictEqual(words.length, 20, name + ' 단어 수');
+  assert.strictEqual(new Set(words).size, 20, name + '에 겹치는 단어가 있음');
+}
+
+// AI로 단어 채우기: Claude 아티팩트에서만 생기는 window.claude를 흉내 낸다
+(async () => {
+  for (const k of Object.keys(store)) delete store[k];
+  let asked = '';
+  const answer = '여기 있어요:\n["새우깡", "포카칩", "꼬깔콘", "새우깡", "홈런볼", "빼빼로"]';
+  global.window.claude = { use: (n) => Promise.resolve(n === 'sample' ? (input) => { asked = input; return Promise.resolve({ text: answer }); } : null) };
+  boot();
+  await new Promise((r) => setTimeout(r, 0));
+  click('cat-open');
+  assert(has('ai-fill'), 'AI 버튼이 안 보임');
+  H.input({ target: { dataset: {}, id: 'ccName', value: '과자' } });
+  click('ai-fill');
+  await new Promise((r) => setTimeout(r, 0));
+  assert(asked.includes('과자'), '주제가 AI에게 전달되지 않음');
+  assert(app.innerHTML.includes('새우깡, 포카칩, 꼬깔콘, 홈런볼, 빼빼로'), 'AI 단어가 채워지지 않음(중복 제거 포함)');
+  click('add-cat');
+  assert(app.innerHTML.includes('data-c="과자"'), '만든 주제가 목록에 없음');
+
+  delete global.window.claude;
+  boot();
+  click('cat-open');
+  assert(!has('ai-fill'), 'Claude 밖에서는 AI 버튼이 없어야 함');
+
+  console.log('ok: 판 8개, 기본 주제 ' + Object.keys(BUILTIN).length + '개, AI 채우기 통과');
+})().catch((e) => { console.error(e); process.exit(1); });
