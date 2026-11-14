@@ -364,8 +364,9 @@ function startRound(){
   var roles=S.players.map(function(){return 'citizen';}), i;
   for(i=0;i<S.liars;i++) roles[idx[i]]='liar';
   if(S.spy) roles[idx[S.liars]]='spy';
-  var start=rnd(n), order=[];
-  for(i=0;i<n;i++) order.push((start+i)%n);
+  /* Speaking always starts with player 1 and goes round in seat order. */
+  var order=[];
+  for(i=0;i<n;i++) order.push(i);
   var turns=[]; for(i=0;i<S.laps;i++) turns=turns.concat(order);
   R={cat:cat,word:word,fake:fake,words:shuffle(words.filter(function(w){return w!==fake;})),roles:roles,order:order,turns:turns,
      citizens:roles.filter(function(r){return r==='citizen';}).length,

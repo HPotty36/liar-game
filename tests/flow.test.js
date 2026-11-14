@@ -113,7 +113,7 @@ click('start');
 boot();
 assert(app.innerHTML.includes('카드 확인 1/7'), '새로고침 후 진행 중인 판이 이어지지 않음');
 
-// 첫 발언자는 역할과 상관없이 무작위여야 한다 (4명·라이어 1명이면 라이어가 첫 순서일 확률 1/4)
+// 발언은 항상 1번부터. 라이어 배정은 무작위라 1번이 라이어일 확률은 1/4이어야 한다
 {
   for (const k of Object.keys(store)) delete store[k];
   boot();
@@ -122,12 +122,13 @@ assert(app.innerHTML.includes('카드 확인 1/7'), '새로고침 후 진행 중
   for (let i = 0; i < N; i++) {
     click('start');
     const r = round();
+    assert.deepStrictEqual(r.order, [0, 1, 2, 3], '발언은 항상 1번부터 자리 순서대로');
     if (r.roles[r.order[0]] === 'liar') liarFirst++;
     H.click({ target: { closest: () => ({ dataset: { a: 'quit-yes' }, disabled: false }) } });
   }
   const p = liarFirst / N;
-  assert(p > 0.21 && p < 0.29, '첫 발언자가 라이어일 비율이 1/4에서 벗어남: ' + p);
-  console.log('첫 발언자가 라이어인 비율: ' + (p * 100).toFixed(1) + '% (기대 25%)');
+  assert(p > 0.21 && p < 0.29, '1번이 라이어일 비율이 1/4에서 벗어남: ' + p);
+  console.log('1번이 라이어인 비율: ' + (p * 100).toFixed(1) + '% (기대 25%)');
 }
 
 // 다크 모드 스위치
