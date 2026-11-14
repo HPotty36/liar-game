@@ -12,7 +12,8 @@ let H = {};
 const store = {};
 const app = { innerHTML: '', scrollTop: 0, addEventListener: (t, f) => (H[t] = f), querySelector: () => null };
 const el = { classList: { toggle() {} }, dataset: { ready: '' }, setPointerCapture() {} };
-global.document = { getElementById: (id) => (id === 'app' ? app : el), addEventListener() {} };
+const root = { attrs: {}, getAttribute(k) { return this.attrs[k] || null; }, setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; } };
+global.document = { documentElement: root, getElementById: (id) => (id === 'app' ? app : el), addEventListener() {} };
 global.window = { __noGuard: true };
 global.navigator = {};
 global.localStorage = { getItem: (k) => store[k] || null, setItem: (k, v) => (store[k] = v) };
@@ -111,6 +112,27 @@ assert.strictEqual(r.title, '전원 라이어!'); assert.strictEqual(r.gains, 0)
 click('start');
 boot();
 assert(app.innerHTML.includes('카드 확인 1/7'), '새로고침 후 진행 중인 판이 이어지지 않음');
+
+// 첫 발언자는 역할과 상관없이 무작위여야 한다 (4명·라이어 1명이면 라이어가 첫 순서일 확률 1/4)
+{
+  for (const k of Object.keys(store)) delete store[k];
+  boot();
+  let liarFirst = 0;
+  const N = 4000;
+  for (let i = 0; i < N; i++) {
+    click('start');
+    const r = round();
+    if (r.roles[r.order[0]] === 'liar') liarFirst++;
+    H.click({ target: { closest: () => ({ dataset: { a: 'quit-yes' }, disabled: false }) } });
+  }
+  const p = liarFirst / N;
+  assert(p > 0.21 && p < 0.29, '첫 발언자가 라이어일 비율이 1/4에서 벗어남: ' + p);
+  console.log('첫 발언자가 라이어인 비율: ' + (p * 100).toFixed(1) + '% (기대 25%)');
+}
+
+// 다크 모드 스위치
+click('theme'); assert.strictEqual(root.attrs['data-mode'], 'dark');
+click('theme'); assert.strictEqual(root.attrs['data-mode'], 'light');
 
 // 기본 주제: 40개 이상, 주제마다 겹치지 않는 단어 20개
 const BUILTIN = (0, eval)('(' + js.match(/var BUILTIN=(\{[\s\S]*?\n\});/)[1] + ')');

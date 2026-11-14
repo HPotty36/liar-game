@@ -17,20 +17,21 @@
   --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
   color-scheme:light;
 }
+/* Dark is pitch black. The in-page switch (data-mode) wins over the host's data-theme and the system setting. */
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#111110; --surface:#1c1c1a; --raised:#3b3b37; --card:#262623; --ink:#f3f2ef; --sub:#a6a39c;
-    --line:#2e2e2b; --edge:#3f3f3a; --fill:#282826;
-    --accent:#3447e8; --on-accent:#ffffff; --accent-soft:#1f2552; --accent-ink:#a9b4ff;
-    --danger:#ff8a7d; --shadow:0 16px 34px rgba(0,0,0,.5);
-    color-scheme:dark;
+  :root:not([data-theme="light"]):not([data-mode]){
+  --bg:#000000; --surface:#111110; --raised:#3a3a36; --card:#1a1a18; --ink:#f3f2ef; --sub:#a6a39c;
+  --line:#262624; --edge:#3a3a36; --fill:#1e1e1c;
+  --accent:#3447e8; --on-accent:#ffffff; --accent-soft:#1c2250; --accent-ink:#a9b4ff;
+  --danger:#ff8a7d; --shadow:0 16px 34px rgba(52,71,232,.28);
+  color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{
-  --bg:#111110; --surface:#1c1c1a; --raised:#3b3b37; --card:#262623; --ink:#f3f2ef; --sub:#a6a39c;
-  --line:#2e2e2b; --edge:#3f3f3a; --fill:#282826;
-  --accent:#3447e8; --on-accent:#ffffff; --accent-soft:#1f2552; --accent-ink:#a9b4ff;
-  --danger:#ff8a7d; --shadow:0 16px 34px rgba(0,0,0,.5);
+:root[data-theme="dark"]:not([data-mode]),:root[data-mode="dark"]{
+  --bg:#000000; --surface:#111110; --raised:#3a3a36; --card:#1a1a18; --ink:#f3f2ef; --sub:#a6a39c;
+  --line:#262624; --edge:#3a3a36; --fill:#1e1e1c;
+  --accent:#3447e8; --on-accent:#ffffff; --accent-soft:#1c2250; --accent-ink:#a9b4ff;
+  --danger:#ff8a7d; --shadow:0 16px 34px rgba(52,71,232,.28);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -89,6 +90,13 @@ textarea{min-height:92px;resize:vertical}
 .form{display:flex;flex-direction:column;gap:8px}
 .bar{position:sticky;bottom:0;margin:auto -20px -24px;padding:22px 20px 18px;background:linear-gradient(to top,var(--bg) 86%,transparent);display:flex;flex-direction:column;gap:8px}
 .bar .note{text-align:center}
+.switch{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:8px 0;min-height:44px;color:var(--sub);font-size:15px;font-weight:600}
+.switch i{position:relative;width:46px;height:28px;border-radius:99px;background:var(--edge);transition:background .15s}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.switch[aria-checked=true] i{background:var(--accent)}
+.switch[aria-checked=true] i::after{transform:translateX(18px)}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+@media (prefers-reduced-motion:reduce){ .switch i,.switch i::after{transition:none} }
 
 /* buttons: ink for the one main action, grey for the rest */
 .btn{width:100%;min-height:56px;border:0;border-radius:14px;background:var(--ink);color:var(--bg);padding:12px 18px;font-weight:700;font-size:17px;line-height:1.25}
@@ -240,11 +248,11 @@ function defaults(){
   return {players:[1,2,3,4].map(function(i){return {name:'',score:0};}),
     mode:'basic',liars:1,spy:false,cats:Object.keys(BUILTIN),custom:{},
     speakSec:30,laps:1,discussSec:120,screen:'setup',used:[],draft:{name:'',words:''},draftErr:'',
-    namesOpen:false,catOpen:false,catsOpen:false,aiBusy:false,quit:false,skip:false};
+    theme:'auto',namesOpen:false,catOpen:false,catsOpen:false,aiBusy:false,quit:false,skip:false};
 }
 function loadSaved(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null')||{}; }catch(e){ return {}; } }
 function save(){
-  try{ localStorage.setItem(KEY,JSON.stringify({players:S.players,mode:S.mode,liars:S.liars,spy:S.spy,cats:S.cats,custom:S.custom,speakSec:S.speakSec,laps:S.laps,discussSec:S.discussSec,used:S.used,catsV:2,
+  try{ localStorage.setItem(KEY,JSON.stringify({players:S.players,mode:S.mode,liars:S.liars,spy:S.spy,cats:S.cats,custom:S.custom,speakSec:S.speakSec,laps:S.laps,discussSec:S.discussSec,used:S.used,theme:S.theme,catsV:2,
     round:(R&&S.screen!=='setup')?{R:R,screen:S.screen,at:Date.now()}:null})); }catch(e){}
 }
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -271,6 +279,18 @@ function parseWords(text){
     if(w&&w.length<=20&&!seen[w]&&out.length<40){ seen[w]=1; out.push(w); }
   });
   return out;
+}
+/* Theme: 'auto' follows the host or the system; the switch pins light or dark for this phone. */
+function isDark(){
+  if(S.theme==='dark') return true;
+  if(S.theme==='light') return false;
+  var host=document.documentElement.getAttribute('data-theme');
+  if(host) return host==='dark';
+  try{ return !!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches); }catch(e){ return false; }
+}
+function applyTheme(){
+  var el=document.documentElement;
+  if(S.theme==='dark'||S.theme==='light') el.setAttribute('data-mode',S.theme); else el.removeAttribute('data-mode');
 }
 function maxLiars(n,spy){ return Math.max(1,n-(spy?1:0)); }
 function clamp(){
@@ -405,7 +425,7 @@ function summary(){
 }
 function vSetup(){
   var n=S.players.length, mL=maxLiars(n,S.spy), cats=allCats(), hasScore=S.players.some(function(p){return p.score;});
-  var h='<header><h1 class="title" tabindex="-1">라이어 <em>게임</em></h1><p class="lead">폰 하나를 돌려가며 해요.</p></header>';
+  var h='<header><div class="head"><h1 class="title" tabindex="-1">라이어 <em>게임</em></h1><button type="button" class="switch" role="switch" aria-checked="'+isDark()+'" data-a="theme">다크 모드<i></i></button></div><p class="lead">폰 하나를 돌려가며 해요.</p></header>';
 
   h+='<section class="sec"><div class="line"><h2>인원</h2><div class="count"><button type="button" class="sq" data-a="pc" data-d="-1" aria-label="한 명 줄이기"'+(n<=MINP?' disabled':'')+'>−</button><b>'+n+'명</b><button type="button" class="sq" data-a="pc" data-d="1" aria-label="한 명 늘리기"'+(n>=MAXP?' disabled':'')+'>+</button></div></div>';
   if(S.namesOpen) h+='<div class="names">'+S.players.map(function(p,i){
@@ -566,6 +586,7 @@ var ACT={
     if(+d.d<0&&n>MINP) S.players.pop();
     clamp();
   },
+  'theme':function(){ S.theme=isDark()?'light':'dark'; applyTheme(); },
   'names':function(){ S.namesOpen=true; },
   'set':function(d){
     var k=d.k, v=d.v;
@@ -683,6 +704,8 @@ function start(data){
   else if(rd&&rd.R&&VIEWS[rd.screen]&&Date.now()-rd.at<3*3600*1000&&rd.R.roles&&rd.R.roles.length===(S.players||[]).length){ R=rd.R; S.screen=rd.screen; }
   if(!Array.isArray(S.used)) S.used=[];
   S.quit=false; S.skip=false;
+  if(S.theme!=='dark'&&S.theme!=='light') S.theme='auto';
+  applyTheme();
   if(!Array.isArray(S.players)||S.players.length<MINP) S.players=defaults().players;
   S.players.forEach(function(p,i){ if(/^플레이어 \d+$/.test(p.name||'')) p.name=''; });
   if(!S.custom||typeof S.custom!=='object') S.custom={};
